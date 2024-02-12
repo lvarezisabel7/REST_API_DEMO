@@ -28,13 +28,16 @@ public interface ProductoDao extends JpaRepository<Producto, Integer>{
      * Y no se pueden utilizar consultas de SQL nativas porque no soportan la paginacion y el ordenamiento
      */
 
+     // Metodo 1
      @Query(value = "select p from Producto p left join fetch p.presentacion",
             countQuery = "select count(p) from Producto p left join p.presentacion ")
      public Page<Producto> findAll(Pageable pageable);
-
+     
+    // Metodo 2
      @Query(value = "select p from Producto p left join fetch p.presentacion")
      public List<Producto> findAll(Sort sort);
 
+    // Metodo 3
      @Query(value = "select p from Producto p left join fetch p.presentacion where p.id = :id")
      public Producto findById(int id);
      
