@@ -3,7 +3,9 @@ package com.example.entities;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -49,8 +51,9 @@ public class Producto implements Serializable{
     @Min(value = 0, message = "El precio no puede ser negativo")
     private int price;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    //https://stackoverflow.com/questions/67353793/what-does-jsonignorepropertieshibernatelazyinitializer-handler-do
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Presentacion presentacion;
 
 
