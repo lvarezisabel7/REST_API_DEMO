@@ -54,6 +54,7 @@ public class Producto implements Serializable{
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     //https://stackoverflow.com/questions/67353793/what-does-jsonignorepropertieshibernatelazyinitializer-handler-do
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+   
     private Presentacion presentacion;
 
 
