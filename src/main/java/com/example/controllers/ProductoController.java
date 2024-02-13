@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.catalina.connector.Response;
-
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -90,7 +90,20 @@ public class ProductoController {
             return responseEntity;
         }
 
-        // No hay errores en el producto
+        // No hay errores en el producto, pues a persistir el producto
+        try {
+            Producto productoPersistido = productoService.save(producto);
+            String succesMessage = "El producto se ha persistido exitosamente";
+            responseAsMap.put("Success Message", succesMessage);
+            responseAsMap.put("Producto Persistido", productoPersistido); // para que el usuario vea que se ha persistido
+            responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.CREATED);
+        } catch (DataAccessException e) {
+            String error = "Error al intentar persistir el producto y la causa mas probable es: " 
+                    + e.getMostSpecificCause();
+            responseAsMap.put("error", error);
+            responseAsMap.put("Producto que se ha intentado persistir", producto);
+            responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         return responseEntity;
     }
