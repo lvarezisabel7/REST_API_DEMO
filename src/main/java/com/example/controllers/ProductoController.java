@@ -16,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -107,5 +109,52 @@ public class ProductoController {
 
         return responseEntity;
     }
+
+    // Metodo que actualiza un producto cuyo id recibe como parametro
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> updateProduct(@Valid @RequestBody Producto producto, 
+                        BindingResult validationResults,
+                        @PathVariable(name = "id", required = true) Integer idProducto) {
+
+        Map<String, Object> responseAsMap = new HashMap<>();
+        ResponseEntity<Map<String, Object>> responseEntity = null;
+        // Comprobar si el producto tiene errores
+        if(validationResults.hasErrors()) {
+
+            List<String> errores = new ArrayList<>();
+
+            List<ObjectError> ObjectErrors = validationResults.getAllErrors();
+
+            ObjectErrors.forEach(objectError -> 
+                errores.add(objectError.getDefaultMessage()));    
+            // El mensaje es lo que hemos puesto en la anotacion en la entidad Producto
+
+            responseAsMap.put("errores", errores);
+            responseAsMap.put("Producto Mal Formado", producto);
+
+            responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.BAD_REQUEST);
+
+            return responseEntity;
+        }
+
+        // No hay errores en el producto, pues a actualizar el producto
+        try {
+            producto.setId(idProducto);
+            Producto productoActualizado = productoService.save(producto);
+            String succesMessage = "El producto se ha actualizado exitosamente";
+            responseAsMap.put("Success Message", succesMessage);
+            responseAsMap.put("Producto Actualizado", productoActualizado); // para que el usuario vea que se ha persistido
+            responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.OK);
+        } catch (DataAccessException e) {
+            String error = "Error al intentar actualizar el producto y la causa mas probable es: " 
+                    + e.getMostSpecificCause();
+            responseAsMap.put("error", error);
+            responseAsMap.put("Producto que se ha intentado actualizar", producto);
+            responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return responseEntity;
+    }
+    
 
 }
