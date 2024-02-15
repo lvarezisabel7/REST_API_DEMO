@@ -1,5 +1,6 @@
 package com.example.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -155,6 +157,59 @@ public class ProductoController {
 
         return responseEntity;
     }
+
+    // Metodo que recupera un producto por el ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> findProductById(@PathVariable(name = "id",
+                required = true) Integer idProduct) throws IOException {
+            
+            Map<String, Object> responseAsMap = new HashMap<>();
+            ResponseEntity<Map<String, Object>> responseEntity = null;
+            
+            try {
+                Producto producto = productoService.findById(idProduct);
+
+                if(producto != null) {
+                    String successMessage = "Producto con id " + idProduct + ", encontrado";
+                    responseAsMap.put("successMessage", successMessage);
+                    responseAsMap.put("producto", producto);
+                    responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.OK);
+                } else {
+                    String errorMessage = "Producto con id " + idProduct + ", no encontrado";
+                    responseAsMap.put("errorMessage", errorMessage);
+                    responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.NOT_FOUND);
+
+                }
+            } catch (DataAccessException e) {
+                String errorGrave = "Se ha producido un error grave al buscar el producto con id " + idProduct +
+                                    ", y la cuasa mas probable es: " + e.getMostSpecificCause();
+                responseAsMap.put("errorGrave", errorGrave);
+                responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return responseEntity;
+                }
     
+    // Eliminar un producto por el ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> deleteProductById(@PathVariable(name = "id",
+                                                                required = true) Integer idProduct) {
+        Map<String, Object> responseAsMap = new HashMap<>();
+        ResponseEntity<Map<String, Object>> responseEntity = null;
+        
+        try {
+            productoService.delete(productoService.findById(idProduct));
+            String succesMessage = "Producto con id " + idProduct + ", eliminado exitosamente";
+            responseAsMap.put("successMessage", succesMessage);
+            responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.OK);
+        } catch (DataAccessException e) {
+            String errorGrave = "Error grave al intentar eliminar el producto con id " + idProduct +
+                                    ", y la causa mas probable es: " + e.getMostSpecificCause();
+            responseAsMap.put("errorGrave", errorGrave);
+            responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
+        } 
+
+        return responseEntity;
+    }
 
 }
