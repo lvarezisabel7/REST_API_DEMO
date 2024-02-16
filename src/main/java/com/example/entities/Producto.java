@@ -49,7 +49,7 @@ public class Producto implements Serializable{
     private int stock;
 
     @Min(value = 0, message = "El precio no puede ser negativo")
-    private int price;
+    private double price;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     //https://stackoverflow.com/questions/67353793/what-does-jsonignorepropertieshibernatelazyinitializer-handler-do
