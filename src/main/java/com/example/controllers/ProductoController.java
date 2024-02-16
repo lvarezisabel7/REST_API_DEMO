@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.catalina.connector.Response;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entities.Producto;
+import com.example.helpers.FileDownloadUtil;
 import com.example.helpers.FileUploadUtil;
 import com.example.model.FileUploadResponse;
 import com.example.services.ProductoService;
@@ -44,6 +48,7 @@ public class ProductoController {
 
     private final ProductoService productoService;
     private final FileUploadUtil fileUploadUtil;
+    private final FileDownloadUtil  fileDownloadUtil;
 
     // El metodo responde a una request del tipo http://localhost:8080/productos?page=0&size=3
     // Si no se especifica page y size entonces que devuleve los productos ordenados por el nombre, por ejemplo
@@ -263,4 +268,31 @@ public class ProductoController {
         return responseEntity;
     }
 
+       /**
+     *  Implementa filedownnload end point API 
+     **/    
+    @GetMapping("/downloadFile/{fileCode}")
+    public ResponseEntity<?> downloadFile(@PathVariable(name = "fileCode") String fileCode) {
+
+        Resource resource = null;
+
+        try {
+            resource = fileDownloadUtil.getFileAsResource(fileCode);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        if (resource == null) {
+            return new ResponseEntity<>("File not found ", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/octet-stream"; 
+        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\""; 
+
+        return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(contentType)) // para especificar el tipo de archivo que vas a subir
+        .header(HttpHeaders.CONTENT_DISPOSITION, headerValue) // content_disposition para indicar que va a ser un adjunto
+        .body(resource);
+
+    }  
 }
