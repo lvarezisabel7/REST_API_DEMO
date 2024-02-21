@@ -84,6 +84,14 @@
 			<version>0.12.5</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
