@@ -1,5 +1,6 @@
 package com.example.security.entities;
 
+import java.io.Serializable;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -26,7 +27,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario {
+public class Usuario implements Serializable {
+
+    private static final long versionSerialUID = 1L;
 
     @Column(name = "id_usuario")
     @Id
