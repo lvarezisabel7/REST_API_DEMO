@@ -36,7 +36,8 @@ public class Usuario implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idUsuario;
 
-    private String name;
+    @Column(name = "username") // como hemos puesto userName con camelCase ponemos el column para espeficar el nombre con el que queremos que se cree
+    private String userName;
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
