@@ -1,17 +1,21 @@
 package com.example.security;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -43,28 +47,27 @@ public class SecurityConfig {
     // Y es aquí donde determinaremos los permisos según los roles de usuarios para acceder a nuestra aplicación
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        // http
-        //         .csrf().disable()
-        //         .exceptionHandling() //Permitimos el manejo de excepciones
-        //         .authenticationEntryPoint(jwtAuthenticationEntryPoint) //Nos establece un punto de entrada personalizado de autenticación para el manejo de autenticaciones no autorizadas
-        //         .and()
-        //         .sessionManagement() //Permite la gestión de sessiones
-        //         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        //         .and()
-        //         .authorizeHttpRequests() //Toda petición http debe ser autorizada
-        //         .requestMatchers("/api/auth/**").permitAll()
-        //         .requestMatchers(HttpMethod.POST, "/api/celular/crear").hasAuthority("ADMIN")
-        //         .requestMatchers(HttpMethod.GET,"/api/celular/listar").hasAnyAuthority("ADMIN" , "USER")
-        //         .requestMatchers(HttpMethod.GET,"/api/celular/listarId/**").hasAnyAuthority("ADMIN" , "USER")
-        //         .requestMatchers(HttpMethod.DELETE,"/api/celular/eliminar/**").hasAuthority("ADMIN")
-        //         .requestMatchers(HttpMethod.PUT, "/api/celular/actualizar").hasAuthority("ADMIN")
-        //         .anyRequest().authenticated()
-        //         .and()
-        //         .httpBasic();
-        // http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        // return http.build();
 
-        return null;
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(handling -> handling //Permitimos el manejo de excepciones
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .sessionManagement(management -> management //Permite la gestión de sessiones
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(requests -> requests //Toda petición http debe ser autorizada
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST).hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/productos/**").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/productos/id/**").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE).hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT).hasAuthority("ADMIN")
+                        .anyRequest().authenticated())
+                        .httpBasic(withDefaults());
+        
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+
     }
 
 }
